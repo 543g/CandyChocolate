@@ -74,29 +74,46 @@ LP.Idled:Connect(function()
     end
 end)
 
--- Auto-walk feature (moves character forward periodically)
+-- Auto-walk feature (uses BodyVelocity for realistic movement)
+local bodyVelocity = nil
+
 task.spawn(function()
     while true do
-        task.wait(0.2)
+        task.wait(0.1)
         if Settings.AutoWalk and getgenv().CandyAssistActive then
             local root = GetRoot()
             local humanoid = GetHumanoid()
             
             if root and humanoid and humanoid.Health > 0 then
+                -- Create BodyVelocity if it doesn't exist
+                if not bodyVelocity or not bodyVelocity.Parent then
+                    bodyVelocity = Instance.new("BodyVelocity")
+                    bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
+                    bodyVelocity.P = 10000
+                    bodyVelocity.Parent = root
+                end
+                
+                -- Move forward based on camera direction
                 local lookVector = root.CFrame.LookVector
-                root.CFrame = root.CFrame + (lookVector * 0.5)
+                bodyVelocity.Velocity = Vector3.new(lookVector.X * 16, 0, lookVector.Z * 16)
+            end
+        else
+            -- Remove BodyVelocity when disabled
+            if bodyVelocity and bodyVelocity.Parent then
+                bodyVelocity:Destroy()
+                bodyVelocity = nil
             end
         end
     end
 end)
 
--- Speed adjustment feature
+-- Speed adjustment feature (continuous)
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(0.1) -- Check more frequently
         if Settings.SpeedAdjust and getgenv().CandyAssistActive then
             local humanoid = GetHumanoid()
-            if humanoid then 
+            if humanoid and humanoid.WalkSpeed ~= Settings.WalkSpeed then
                 humanoid.WalkSpeed = Settings.WalkSpeed
             end
         end
@@ -313,6 +330,11 @@ CloseButton.MouseButton1Click:Connect(function()
     Settings.SpeedAdjust = false
     Settings.CameraZoom = false
     camera.FieldOfView = defaultFOV
+    
+    -- Clean up BodyVelocity
+    if bodyVelocity and bodyVelocity.Parent then
+        bodyVelocity:Destroy()
+    end
     
     TweenService:Create(MainFrame, TweenInfo.new(0.3), {Position = UDim2.new(1, 50, 0.5, -250)}):Play()
     task.wait(0.3)
