@@ -22,7 +22,7 @@ A quality-of-life enhancement tool for keyboard escape games on Roblox, specific
 
 ### Method 1: Direct Execution
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/543g/CandyChocolate/main/CandyAssist.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/543g/CandyChocolate/master/CandyAssist.lua"))()
 ```
 
 ### Method 2: Manual Load
